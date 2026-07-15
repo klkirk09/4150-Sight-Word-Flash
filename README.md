@@ -14,6 +14,7 @@ Five word levels:
   - Second Grade
   - Third Grade
 
+Additional features:
 - Flash card gameplay
 - Results screen after every round
 - Statistics screen (top right corner of app)

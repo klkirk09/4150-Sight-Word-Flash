@@ -16,8 +16,14 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  late final List<String> roundWords;
-  int currentIndex = 0;
+  late final List<String> originalWords;
+  late final List<String> wordQueue;
+
+  final Set<String> practicedWords = {};
+
+  int clearedWords = 0;
+  int firstTryCorrect = 0;
+  bool isProcessingTap = false;
 
   @override
   void initState() {
@@ -26,27 +32,67 @@ class _GameScreenState extends State<GameScreen> {
     final words = DolchWords.getWordsForLevel(widget.level);
     words.shuffle(Random());
 
-    roundWords = words.take(10).toList();
+    originalWords = words.take(10).toList();
+    wordQueue = List<String>.from(originalWords);
   }
 
-  void _goToNextWord() {
-    if (currentIndex >= roundWords.length - 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Round complete'),
-        ),
-      );
+  void _handleKnowIt() {
+    if (isProcessingTap || wordQueue.isEmpty) {
       return;
     }
 
+    isProcessingTap = true;
+
+    final currentWord = wordQueue.first;
+
+    if (!practicedWords.contains(currentWord)) {
+      firstTryCorrect++;
+    }
+
     setState(() {
-      currentIndex++;
+      wordQueue.removeAt(0);
+      clearedWords++;
+      isProcessingTap = false;
     });
+
+    if (wordQueue.isEmpty) {
+      _showRoundComplete();
+    }
+  }
+
+  void _handlePracticeAgain() {
+    if (isProcessingTap || wordQueue.isEmpty) {
+      return;
+    }
+
+    isProcessingTap = true;
+
+    final currentWord = wordQueue.removeAt(0);
+    practicedWords.add(currentWord);
+    wordQueue.add(currentWord);
+
+    setState(() {
+      isProcessingTap = false;
+    });
+  }
+
+  void _showRoundComplete() {
+    final score = ((firstTryCorrect / originalWords.length) * 100).round();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Round complete: $score%',
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentWord = roundWords[currentIndex];
+    final currentWord = wordQueue.isEmpty ? '' : wordQueue.first;
+    final progress = clearedWords / originalWords.length;
 
     return Scaffold(
       appBar: AppBar(
@@ -59,11 +105,11 @@ class _GameScreenState extends State<GameScreen> {
           child: Column(
             children: [
               LinearProgressIndicator(
-                value: (currentIndex + 1) / roundWords.length,
+                value: progress,
               ),
               const SizedBox(height: 12),
               Text(
-                '${currentIndex + 1} of ${roundWords.length}',
+                '$clearedWords of ${originalWords.length} cleared',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const Spacer(),
@@ -90,10 +136,27 @@ class _GameScreenState extends State<GameScreen> {
               SizedBox(
                 width: double.infinity,
                 height: 64,
-                child: FilledButton(
-                  onPressed: _goToNextWord,
-                  child: const Text(
-                    'Next Word',
+                child: FilledButton.icon(
+                  onPressed: isProcessingTap ? null : _handleKnowIt,
+                  icon: const Icon(Icons.check_circle),
+                  label: const Text(
+                    'I Know It',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 64,
+                child: OutlinedButton.icon(
+                  onPressed: isProcessingTap ? null : _handlePracticeAgain,
+                  icon: const Icon(Icons.replay),
+                  label: const Text(
+                    'Practice Again',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,

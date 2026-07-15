@@ -1,5 +1,5 @@
 import 'dart:math';
-
+import 'results_screen.dart';
 import 'package:flutter/material.dart';
 import '../data/dolch_words.dart';
 
@@ -79,12 +79,15 @@ class _GameScreenState extends State<GameScreen> {
   void _showRoundComplete() {
     final score = ((firstTryCorrect / originalWords.length) * 100).round();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Round complete: $score%',
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResultsScreen(
+          level: widget.level,
+          score: score,
+          firstTryCorrect: firstTryCorrect,
+          totalWords: originalWords.length,
         ),
-        duration: const Duration(seconds: 2),
       ),
     );
   }

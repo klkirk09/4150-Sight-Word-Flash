@@ -1,9 +1,64 @@
 import 'package:flutter/material.dart';
+
 import '../data/dolch_words.dart';
 import 'game_screen.dart';
+import 'stats_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool isNavigating = false;
+
+  Future<void> _openGame(String level) async {
+    if (isNavigating) {
+      return;
+    }
+
+    setState(() {
+      isNavigating = true;
+    });
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GameScreen(level: level),
+      ),
+    );
+
+    if (mounted) {
+      setState(() {
+        isNavigating = false;
+      });
+    }
+  }
+
+  Future<void> _openStats() async {
+    if (isNavigating) {
+      return;
+    }
+
+    setState(() {
+      isNavigating = true;
+    });
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const StatsScreen(),
+      ),
+    );
+
+    if (mounted) {
+      setState(() {
+        isNavigating = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,14 +70,7 @@ class HomeScreen extends StatelessWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Stats screen coming later'),
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            },
+            onPressed: isNavigating ? null : _openStats,
             icon: const Icon(Icons.bar_chart),
             tooltip: 'Stats',
           ),
@@ -57,14 +105,10 @@ class HomeScreen extends StatelessWidget {
                       width: double.infinity,
                       height: 72,
                       child: FilledButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  GameScreen(level: level),
-                            ),
-                          );
+                        onPressed: isNavigating
+                            ? null
+                            : () {
+                          _openGame(level);
                         },
                         child: Text(
                           level,

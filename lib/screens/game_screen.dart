@@ -1,7 +1,11 @@
 import 'dart:math';
-import 'results_screen.dart';
+
 import 'package:flutter/material.dart';
+
 import '../data/dolch_words.dart';
+import '../models/score_record.dart';
+import '../services/score_service.dart';
+import 'results_screen.dart';
 
 class GameScreen extends StatefulWidget {
   final String level;
@@ -20,6 +24,7 @@ class _GameScreenState extends State<GameScreen> {
   late final List<String> wordQueue;
 
   final Set<String> practicedWords = {};
+  final ScoreService scoreService = ScoreService();
 
   int clearedWords = 0;
   int firstTryCorrect = 0;
@@ -36,7 +41,7 @@ class _GameScreenState extends State<GameScreen> {
     wordQueue = List<String>.from(originalWords);
   }
 
-  void _handleKnowIt() {
+  Future<void> _handleKnowIt() async {
     if (isProcessingTap || wordQueue.isEmpty) {
       return;
     }
@@ -52,11 +57,17 @@ class _GameScreenState extends State<GameScreen> {
     setState(() {
       wordQueue.removeAt(0);
       clearedWords++;
-      isProcessingTap = false;
     });
 
     if (wordQueue.isEmpty) {
-      _showRoundComplete();
+      await _showRoundComplete();
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        isProcessingTap = false;
+      });
     }
   }
 
@@ -76,8 +87,23 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
-  void _showRoundComplete() {
+  Future<void> _showRoundComplete() async {
     final score = ((firstTryCorrect / originalWords.length) * 100).round();
+
+    final scoreRecord = ScoreRecord(
+      gameType: 'Flash Dash',
+      level: widget.level,
+      score: score,
+      firstTryCorrect: firstTryCorrect,
+      totalWords: originalWords.length,
+      completedAt: DateTime.now(),
+    );
+
+    await scoreService.saveScore(scoreRecord);
+
+    if (!mounted) {
+      return;
+    }
 
     Navigator.pushReplacement(
       context,
@@ -156,7 +182,8 @@ class _GameScreenState extends State<GameScreen> {
                 width: double.infinity,
                 height: 64,
                 child: OutlinedButton.icon(
-                  onPressed: isProcessingTap ? null : _handlePracticeAgain,
+                  onPressed:
+                  isProcessingTap ? null : _handlePracticeAgain,
                   icon: const Icon(Icons.replay),
                   label: const Text(
                     'Practice Again',

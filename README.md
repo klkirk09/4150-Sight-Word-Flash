@@ -14,11 +14,11 @@ Five word levels:
   - Second Grade
   - Third Grade
 
-Flash card gameplay
-Results screen after every round
-Statistics screen (top right corner of app)
-Local storage persistence with sharedPreferences
-Child friendly buttons and colors
+- Flash card gameplay
+- Results screen after every round
+- Statistics screen (top right corner of app)
+- Local storage persistence with sharedPreferences
+- Child friendly buttons and colors
 
 
 # Running Instructions
@@ -37,11 +37,9 @@ and a history of each game played and the scores for each of those games.
 
 # Tradeoffs
 
-Tradeoff 1
-I chose to score rounds using the percentage of words recognized on the first attempt instead of counting every successful answer equally because it better measures initial sight-word recognition. The cost of this approach is that improving after practicing a word does not increase the final score. This works well for Flash Dash because the goal is measuring first recognition rather than persistence.
+Tradeoff 1: I chose to score rounds using the percentage of words recognized on the first attempt instead of counting every successful answer equally because it better measures initial sight-word recognition. The cost of this approach is that improving after practicing a word does not increase the final score. This works well for Flash Dash because the goal is measuring first recognition rather than persistence.
 
-Tradeoff 2
-I chose SharedPreferences instead of SQLite because the application only stores a small amount of score history. SharedPreferences is simpler to implement and easier to understand. The cost is that it is not ideal for storing large amounts of structured data. This approach works well unless the application grows to support multiple users or extensive game history.
+Tradeoff 2: I chose SharedPreferences instead of SQLite because the application only stores a small amount of score history. SharedPreferences is simpler to implement and easier to understand. The cost is that it is not ideal for storing large amounts of structured data. This approach works well unless the application grows to support multiple users or extensive game history.
 
 
 # Project Statement

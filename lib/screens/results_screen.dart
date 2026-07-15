@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'game_screen.dart';
 
 class ResultsScreen extends StatelessWidget {
   final String level;
@@ -65,7 +66,14 @@ class ResultsScreen extends StatelessWidget {
                 height: 64,
                 child: FilledButton.icon(
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GameScreen(
+                          level: level,
+                        ),
+                      ),
+                    );
                   },
                   icon: const Icon(Icons.replay),
                   label: const Text(
